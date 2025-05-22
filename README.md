@@ -1,2 +1,2 @@
-# task-manager
+# tariha
 simple task manager for myself

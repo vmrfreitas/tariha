@@ -1,4 +1,4 @@
-(ns task-manager.core
+(ns tariha.core
   (:require [clojure.tools.cli :as cli]
             [clojure.string :as str]
             [clojure.java.io :as jio]

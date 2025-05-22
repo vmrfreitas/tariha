@@ -1,6 +1,6 @@
-(ns task-manager.core-test
+(ns tariha.core-test
   (:require [clojure.test :refer [deftest is testing]]
-            [task-manager.core :as core]))
+            [tariha.core :as core]))
 
 (deftest a-test
   (testing "FIXME, I fail."
