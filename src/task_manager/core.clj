@@ -4,6 +4,8 @@
             [clojure.java.io :as jio]
             [clojure.pprint :as cpp]
             [clojure.edn :as edn])
+  (:import
+    [java.io File]) ; For File operations and potentially more advanced EDN reading
   (:gen-class))
 
 (def cli-options
