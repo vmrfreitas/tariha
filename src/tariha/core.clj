@@ -11,7 +11,7 @@
 (def cli-options
   ;; An option with a required argument
   [["-a" "--add TASK" "Task description"
-    :id :task-description]
+    :id :add-task]
    ["-p" "--priority PRIORITY" "Task priority"
     :id :priority
     :default 99
@@ -40,7 +40,6 @@
   []
   (let [dir-path (get-app-data-dir-path)
         app-dir-file (jio/file dir-path)] ; Create a java.io.File object from the path string
-    (println (str "cheguei aqui gurizada" dir-path app-dir-file)) 
     (when-not (.exists app-dir-file)
       (try
         (println (str "INFO: Application data directory not found. Attempting to create: " dir-path))
@@ -99,6 +98,14 @@
         updated-tasks (conj current-tasks task)]
     (write-tasks-to-file updated-tasks)))
 
+(defn- print-tasks
+  []
+  (let [tasks (read-tasks-from-file)]
+    (doseq [task tasks]
+      (let [{description :description
+             priority :priority} task]
+        (println (str "Task 0: " description ", priority: " priority ""))))))
+
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
     (cond
@@ -118,13 +125,15 @@
       (do
         (println "Parsed options:" options)
         (println "Remaining arguments:" arguments)
-        ;; Here you would add your logic to handle the task
-        (if (:task-description options)
+        (if (:add-task options)
           (do
-            (println (str "Adding task: '" (:task-description options)
+            (println (str "Adding task: '" (:add-task options)
                           "' with priority: " (:priority options)))
-            (add-task-to-file {:id 1 :description (:task-description options) :priority (:priority options) :done false}))
-          (println "Not adding test"))))))
+            (add-task-to-file {:id (random-uuid) :description (:add-task options) :priority (:priority options) :done false}))
+          (if (and (:priority options) (= (:priority options) 99))
+            (print-tasks)
+            (println "Nothing"))
+        )))))
 
 ;; To test in development with lein run:
 ;; lein run --add "My new task" --priority 1
