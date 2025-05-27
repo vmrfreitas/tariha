@@ -17,6 +17,9 @@
     :default 99
     :parse-fn #(Integer/parseInt %)]
    ["-c" "--complete ID" "Task id"]
+   ["-d" "--delete INDEX" "Task index"
+   :id :delete
+   :parse-fn #(Integer/parseInt %)]
    ["-h" "--help"]])
 
 (defn get-user-home-dir
@@ -98,13 +101,28 @@
         updated-tasks (conj current-tasks task)]
     (write-tasks-to-file updated-tasks)))
 
+(defn- delete-task
+  [remove-index]
+  (let [tasks (read-tasks-from-file)]
+    (doseq [[index task] (map-indexed #(vector %1 %2) tasks)] ; TODO: this does not work, I should be using somthing like 'not any'
+      (if (= index remove-index)
+        (do 
+          (let [{description :description
+             priority :priority} task]
+         (println (str "Task: " description ", with priority: " priority ", will be deleted. Continue? [y/n]")))
+         (let [response (read-line)]
+           (if (= "y" response)
+              (remove #{task} tasks)
+              tasks))) 
+        (println (str "There's no task with index " remove-index))))))
+
 (defn- print-tasks
   []
   (let [tasks (read-tasks-from-file)]
-    (doseq [task tasks]
+    (doseq [[index task] (map-indexed #(vector %1 %2) tasks)]
       (let [{description :description
              priority :priority} task]
-        (println (str "Task 0: " description ", priority: " priority ""))))))
+        (println (str "Task " index ": " description ", priority: " priority ""))))))
 
 (defn -main [& args]
   (let [{:keys [options arguments errors summary]} (cli/parse-opts args cli-options)]
@@ -125,7 +143,7 @@
       (do
         (println "Parsed options:" options)
         (println "Remaining arguments:" arguments)
-        (if (:add-task options)
+        (if (:add-task options) ; cant all this be on a cond as well instead of this ugly if else if else
           (do
             (println (str "Adding task: '" (:add-task options)
                           "' with priority: " (:priority options)))
@@ -133,7 +151,9 @@
           (if (and (:priority options) (= (:priority options) 99))
             (print-tasks)
             (println "Nothing"))
-        )))))
+        )
+        (if (:delete options)
+          (write-tasks-to-file (delete-task (:delete options))))))))
 
 ;; To test in development with lein run:
 ;; lein run --add "My new task" --priority 1
